@@ -76,6 +76,9 @@ class TileState {
   }
 
   CustomPoint _getTilePos(Coords coords, tileSize) {
+    if(_levels[coords.z] == null) {
+      _updateLevels();
+    }
     var level = _levels[coords.z];
     return coords.scaleBy(tileSize) - level!.origin!;
   }
