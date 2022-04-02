@@ -69,6 +69,7 @@ class TileState {
 
   Bounds pxBoundsToTileRange(Bounds bounds,[tileSize = 256]) {
     final tsPoint = CustomPoint(tileSize,tileSize);
+
     return Bounds(
       bounds.min.unscaleBy(tsPoint).floor(),
       bounds.max.unscaleBy(tsPoint).ceil() - const CustomPoint(1, 1),
@@ -76,6 +77,7 @@ class TileState {
   }
 
   CustomPoint _getTilePos(Coords coords, tileSize) {
+
     if(_levels[coords.z] == null) {
       _updateLevels();
     }
@@ -153,7 +155,7 @@ class TileState {
     for (var z in _levels.keys) {
       var levelZ = _levels[z];
       if(levelZ != null) {
-        if (z == zoom) { /// recheck here.....
+        if (z == zoom) { // recheck here.....
           var levelZi = _levels[z];
           if (levelZi != null) {
             levelZi.zIndex = maxZoom = (zoom - z).abs();
@@ -164,7 +166,7 @@ class TileState {
 
     var max = maxZoom + 2; // arbitrary, was originally for overzoom
 
-    for(var tempZoom in [for(var i=1.0; i<max; i+=1.0) i]) {
+    for(var tempZoom in [for(var i=0.0; i<max; i+=1.0) i]) {
 
       var level = _levels[tempZoom];
       var map = mapState;
@@ -212,5 +214,24 @@ class TileState {
 
   double getTileZoom() {
     return _tileZoom;
+  }
+
+  void loopOverTiles(  myFunction(num i,j, pos2, matrix3) ) {
+    Bounds _tileRange = getTileRange();
+
+    outerloop: for (var j = _tileRange.min.y; j <= _tileRange.max.y; j++) {
+      innerloop: for (var i = _tileRange.min.x; i <= _tileRange.max.x; i++) {
+
+        var pos = getTilePositionInfo(
+            getTileZoom(), i.toDouble(), j.toDouble());
+
+        var matrix = Matrix4.identity()
+          ..translate(pos.point.x.toDouble(), pos.point.y.toDouble())
+          ..scale(pos.scale);
+
+        myFunction( i, j, pos, matrix );
+      }
+    }
+
   }
 }
