@@ -1,7 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:tuple/tuple.dart';
+
+class Level {
+  late double zIndex;
+  CustomPoint? origin;
+  late double zoom;
+  late CustomPoint translatePoint;
+  late double scale;
+}
+
+
+class TilePointCache {
+  String Type = "LineString";
+  List referenceList = [];
+  Map cache = {};
+
+  TilePointCache();
+
+  void projectList(List latLngList, double zoom, FlutterMapState mapState) {
+    for( final point in latLngList) {
+      final pxPoint = mapState.project(mapState.center, zoom).floor();
+      print("pxPoint $pxPoint");
+    }
+  }
+
+  void add (List pointList, crs) {
+    var entry = {
+      'source': pointList,
+    };
+    //cache.add();
+  }
+}
 
 class PositionInfo {
   CustomPoint point;
@@ -60,7 +92,7 @@ class TileState {
     return crs.scale(zoom) / crs.scale(zoom);
   }
 
-  Bounds getTiledPixelBounds(MapState mapState) {
+  Bounds getTiledPixelBounds(FlutterMapState mapState) {
     var scale = mapState.getZoomScale(mapState.zoom, _tileZoom);
     var pixelCenter = mapState.project(mapState.center, _tileZoom).floor();
     var halfSize = mapState.size / (scale * 2);
@@ -169,12 +201,12 @@ class TileState {
     for(var tempZoom in [for(var i=0.0; i<max; i+=1.0) i]) {
 
       var level = _levels[tempZoom];
-      var map = mapState;
+      FlutterMapState map = mapState;
 
       if (level == null) {
         level = _levels[tempZoom.toDouble()] = Level();
         level.zIndex = maxZoom;
-        var newOrigin = map.project(map.unproject(map.getPixelOrigin()), tempZoom);
+        var newOrigin = map.project(map.unproject(map.pixelOrigin), tempZoom);
         level.origin = newOrigin;
         level.zoom = tempZoom;
         _setZoomTransform(level, map.center, map.zoom);
